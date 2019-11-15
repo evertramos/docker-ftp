@@ -1,0 +1,4 @@
+.env
+data/passwd/pureftpd.passwd
+data/pureftpd.pdb
+

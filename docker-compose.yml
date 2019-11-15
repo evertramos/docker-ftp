@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  ftp:
+    image: ${CONTAINER_IMAGE}
+    container_name: ${CONTAINER_NAME:-ftp}
+    restart: unless-stopped
+    ports:
+      - "${PUBLIC_IP:-0.0.0.0}:${LOCAL_PORT:-21}:${CONTAINER_PORT:-21}"
+      - "${PUBLIC_IP:-0.0.0.0}:${LOCAL_PORT_PASV_MIN:-21101}-${LOCAL_PORT_PASV_MAX:-21110}:${LOCAL_PORT_PASV_MIN:-21101}-${LOCAL_PORT_PASV_MAX:-21110}"
+    volumes:
+      - ${LOCAL_FTP_FILES_PATH:-./data}:${CONTAINER_FTP_FILES_PATH:-/home/ftpusers}
+      - ${LOCAL_CONFIG_PATH:-./config}:${FTP_CONFIG_PATH:-/etc/pure-ftpd}
+    environment:
+      FTP_MAX_CLIENTS: ${FTP_MAX_CLIENTS:-5} 
+      FTP_MAX_CONNECTIONS: ${FTP_MAX_CONNECTIONS:-5}
+      FTP_PASSIVE_PORTS: ${FTP_PASSIVE_PORTS:-21101-21110}
+      LOGIN: "puredb:/etc/pure-ftpd/pureftpd.pdb"
+      PUBLICHOST: "localhost"
+      TLS_CN: ${TLS_CN}
+      TLS_ORG: ${TLS_ORG}
+      TLS_C: ${TLS_C}
+      ADDED_FLAGS: "-E -j -R --tls=2"
+    logging:
+      driver: ${LOG_DRIVER:-json-file}
+      options:
+        max-size: ${LOG_MAX_SIZE:-4m}
+        max-file: ${LOG_MAX_FILE:-10}
+
+networks:
+  default:
+    external:
+      name: ${NETWORK:-webproxy}
